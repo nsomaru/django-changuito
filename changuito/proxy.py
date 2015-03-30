@@ -65,7 +65,7 @@ class CartProxy:
 
     def add(self, product, unit_price, quantity=1):
         try:
-            ctype = ContentType.objects.get_for_model(type(product), for_concrete_model=False)
+            ctype = ContentType.objects.get_for_model(get_model(product), for_concrete_model=False)
             item = models.Item.objects.get(cart=self.cart, product=product, content_type=ctype)
         except models.Item.DoesNotExist:
             item = models.Item()
@@ -75,7 +75,7 @@ class CartProxy:
             item.quantity = quantity
             item.save()
         else:
-            item.quantity += quantity
+            item.quantity += int(quantity)
             item.save()
 
     def remove_item(self, item_id):
