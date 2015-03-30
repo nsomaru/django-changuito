@@ -126,6 +126,24 @@ class CartProxy:
 
         return obj
 
+    def total(self):
+        """
+        The total price of all items in the cart
+        """
+        return sum([item.total_price for item in self.cart.item_set.all()])
+
+    def count(self):
+        """
+        The number of items in the cart, sum of quantities
+        """
+        return sum([item.quantity for item in self.cart.item_set.all()])
+
+    def unique_count(self):
+        """
+        The number of items in the cart, sum of quantities
+        """
+        return len(list(self.cart.item_set.all()))
+
     def get_last_cart(self, user):
         try:
             cart = models.Cart.objects.get(user=user, checked_out=False)
