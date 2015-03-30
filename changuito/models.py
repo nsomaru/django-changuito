@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.models import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 try:
     from django.conf import settings
