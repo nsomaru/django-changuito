@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.models import GenericForeignKey
 
 try:
     from django.conf import settings
@@ -54,6 +55,7 @@ class Item(models.Model):
     # product as generic relation
     content_type = models.ForeignKey(ContentType)
     object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey(for_concrete_model=False)
 
     objects = ItemManager()
 
