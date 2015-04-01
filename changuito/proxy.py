@@ -1,3 +1,5 @@
+import json
+
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.contenttypes.models import ContentType
 
