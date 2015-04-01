@@ -45,6 +45,7 @@ class CartProxy:
         except:
             cart = self.new(request, user=user)
 
+        self.request = request
         self.cart = cart
 
     def __iter__(self):
@@ -148,9 +149,20 @@ class CartProxy:
         """
         return len(list(self.cart.item_set.all()))
 
-    def item_to_json(self, item):
+    def item_to_json(self, item, html=False, template="template/cart_menu.html"):
+        """
+        Returns serialized json of `item`. If `html` is `True`, `template` will
+        be rendered and appended to the list as a dictionary {'html':
+        `rendered_html`}
+        """
+        to_json_list = [item,]
+        # this probably should be done in a view
+        if html:
+            cart_menu_html_json = {'html': render(self.request,
+               template)}
+            to_json_list.append(cart_menu_html_json)
         # this function expects an iterable
-        return serialize("json", [item,])
+        return serialize("json", to_json_list)
 
     def get_last_cart(self, user):
         try:
@@ -159,7 +171,6 @@ class CartProxy:
             self.cart.user = user
             self.cart.save()
             cart = self.cart
-
         return cart
 
     def checkout(self):
