@@ -1,4 +1,4 @@
-import json
+import json, decimal
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.forms.models import model_to_dict
