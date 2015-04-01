@@ -1,3 +1,4 @@
+from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.contenttypes.models import ContentType
 
 import models
@@ -25,6 +26,12 @@ class CartDoesNotExist(Exception):
 
 class UserDoesNotExist(Exception):
     pass
+
+
+class ItemJSONEncoder(DjangoJSONEncoder):
+    def default(self, obj):
+        obj.price = str(obj.price)
+        return super(ItemJSONEncoder, self).default(obj)
 
 
 class CartProxy:
@@ -144,6 +151,9 @@ class CartProxy:
         The number of items in the cart, sum of quantities
         """
         return len(list(self.cart.item_set.all()))
+
+    def item_to_json(self, item):
+        return json.dumps(model_to_dict(item), cls=ItemJSONEncoder) 
 
     def get_last_cart(self, user):
         try:
