@@ -33,7 +33,8 @@ class UserDoesNotExist(Exception):
 
 class ItemJSONEncoder(DjangoJSONEncoder):
     def default(self, obj):
-        obj.price = str(obj.price)
+        if isinstance(obj, decimal.Decimal):
+            obj = str(obj)
         return super(ItemJSONEncoder, self).default(obj)
 
 
