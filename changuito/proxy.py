@@ -1,7 +1,6 @@
 import json, decimal
 
-from django.core.serializers.json import DjangoJSONEncoder
-from django.forms.models import model_to_dict
+from django.core.serializers import serialize
 from django.contrib.contenttypes.models import ContentType
 
 import models
@@ -29,13 +28,6 @@ class CartDoesNotExist(Exception):
 
 class UserDoesNotExist(Exception):
     pass
-
-
-class ItemJSONEncoder(DjangoJSONEncoder):
-    def _iterencode(self, o, markers=None):
-        if isinstance(o, decimal.Decimal):
-            return (str(o) for o in [o])
-        return super(ItemJSONEncoder, self)._iterencode(o, markers)
 
 
 class CartProxy:
@@ -157,7 +149,8 @@ class CartProxy:
         return len(list(self.cart.item_set.all()))
 
     def item_to_json(self, item):
-        return json.dumps(model_to_dict(item), cls=ItemJSONEncoder) 
+        # this function expects an iterable
+        return serialize("json", [item,])
 
     def get_last_cart(self, user):
         try:
