@@ -32,10 +32,10 @@ class UserDoesNotExist(Exception):
 
 
 class ItemJSONEncoder(DjangoJSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, decimal.Decimal):
-            obj = float(str(obj))
-        return super(ItemJSONEncoder, self).default(obj)
+    def _iterencode(self, o, markers=None):
+        if isinstance(o, decimal.Decimal):
+            return (str(o) for o in [o])
+        return super(ItemJSONEncoder, self)._iterencode(o, markers)
 
 
 class CartProxy:
