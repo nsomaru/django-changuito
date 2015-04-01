@@ -1,6 +1,7 @@
 import json, decimal
 
 from django.core.serializers import serialize
+from django.template import RequestContext, Template
 from django.contrib.contenttypes.models import ContentType
 
 import models
@@ -158,8 +159,10 @@ class CartProxy:
         to_json_list = [item,]
         # this probably should be done in a view
         if html:
-            cart_menu_html_json = {'html': render(self.request,
-               template)}
+            t = Template(template)
+            c = RequestContext(self.request)
+            html_rendered = t.render(c)
+            cart_menu_html_json = {'html': html_rendered}
             to_json_list.append(cart_menu_html_json)
         # this function expects an iterable
         return serialize("json", to_json_list)
