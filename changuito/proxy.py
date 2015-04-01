@@ -77,6 +77,7 @@ class CartProxy:
         else:
             item.quantity += int(quantity)
             item.save()
+        return item
 
     def remove_item(self, item_id):
         try:
