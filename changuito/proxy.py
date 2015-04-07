@@ -1,7 +1,7 @@
 import json, decimal
 
 from django.core.serializers import serialize
-from django.template import RequestContext, Template
+from django.template import RequestContext, Template, loader
 from django.contrib.contenttypes.models import ContentType
 
 import models
@@ -162,7 +162,7 @@ class CartProxy:
         """
         Returns a dict {'html': <html menu for cart>}
         """
-        t = Template(template)
+        t = loader.get_template(template)
         c = RequestContext(self.request)
         html_rendered = t.render(c)
         return {'html':  html_rendered}
