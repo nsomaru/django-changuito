@@ -14,6 +14,14 @@ except ImportError:
 
 CART_ID = 'CART-ID'
 
+class DecimalEncoder(json.JSONEncoder):
+    def _iterencode(self, o, markers=None):
+        if isinstance(o, decimal.Decimal):
+            # wanted a simple yield str(o) in the next line,
+            # but that would mean a yield on the line with super(...),
+            # which wouldn't work, so...
+            return (str(o) for o in [o])
+        return super(DecimalEncoder, self)._iterencode(o, markers)
 
 class ItemAlreadyExists(Exception):
     pass
@@ -150,22 +158,25 @@ class CartProxy:
         """
         return len(list(self.cart.item_set.all()))
 
-    def item_to_json(self, item, html=False, template="template/cart_menu.html"):
+    def render_html_menu(self, template="templates/cart_menu.html"):
+        """
+        Returns a dict {'html': <html menu for cart>}
+        """
+        t = Template(template)
+        c = RequestContext(self.request)
+        html_rendered = t.render(c)
+        return {'html':  html_rendered}
+
+    def item_to_json(self, item, html=False, template="templates/cart_menu.html"):
         """
         Returns serialized json of `item`. If `html` is `True`, `template` will
         be rendered and appended to the list as a dictionary {'html':
         `rendered_html`}
         """
-        to_json_list = [item,]
-        # this probably should be done in a view
+        item_dict = item.__dict__
         if html:
-            t = Template(template)
-            c = RequestContext(self.request)
-            html_rendered = t.render(c)
-            cart_menu_html_json = {'html': html_rendered}
-            to_json_list.append(cart_menu_html_json)
-        # this function expects an iterable
-        return serialize("json", to_json_list)
+            item_dict['html'] = self.render_html_menu()['html']
+        return json.dumps(item_dict, cls=DecimalEncoder) 
 
     def get_last_cart(self, user):
         try:
