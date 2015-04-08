@@ -98,6 +98,14 @@ class CartProxy:
         except models.Item.DoesNotExist:
             raise ItemDoesNotExist
 
+    def update_item(self, item_pk, new_quantity):
+        try:
+            item = models.Item.objects.get(pk=item_pk)
+            item.quantity = new_quantity
+            item.save()
+        except models.Item.DoesNotExist:
+            raise ItemDoesNotExist
+
     def update(self, product, quantity, unit_price=None):
         try:
             item = models.Item.objects.get(cart=self.cart, product=product)
