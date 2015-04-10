@@ -1,6 +1,7 @@
 import json, decimal
 
 from django.core.serializers import serialize
+from django.conf import settings
 from django.template import RequestContext, Template, loader
 from django.contrib.contenttypes.models import ContentType
 
@@ -153,6 +154,13 @@ class CartProxy:
         The total price of all items in the cart
         """
         return sum([item.total_price for item in self.cart.item_set.all()])
+
+    def shipping_total(self):
+        ship_f = settings.CART_SHIPPING_FUNCTION
+        return ship_f(self.cart.item_set.all(), settings.CART_SHIPPING_WEIGHT_COST)
+
+    def total_inclusive(self):
+        return self.total() + self.shipping_total()
 
     def count(self):
         """
