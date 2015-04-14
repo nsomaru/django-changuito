@@ -159,7 +159,7 @@ class CartProxy:
     def shipping_total(self):
         ship_f = import_module(settings.CART_SHIPPING_FUNCTION)
         return ship_f(self.cart.item_set.all(),
-                import_module(settings.CART_SHIPPING_WEIGHT_COST_)
+                import_module(settings.CART_SHIPPING_WEIGHT_COST_))
 
     def total_inclusive(self):
         return self.total() + self.shipping_total()
