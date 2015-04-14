@@ -185,7 +185,8 @@ class CartProxy:
             c = RequestContext(self.request)
             html_rendered = t.render(c)
         else:
-            html_rendered = t.render(context)
+            c = RequestContext(context)
+            html_rendered = t.render(c)
         return {'html':  html_rendered}
 
     def item_to_json(self, item, html=False, template="templates/cart_menu.html"):
