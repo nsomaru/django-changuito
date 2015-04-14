@@ -185,7 +185,7 @@ class CartProxy:
             c = RequestContext(self.request)
             html_rendered = t.render(c)
         else:
-            c = RequestContext(context)
+            c = RequestContext(self.request, context)
             html_rendered = t.render(c)
         return {'html':  html_rendered}
 
