@@ -2,6 +2,7 @@ import json, decimal
 
 from django.core.serializers import serialize
 from django.conf import settings
+from django.utils.importlib import import_module
 from django.template import RequestContext, Template, loader
 from django.contrib.contenttypes.models import ContentType
 
@@ -156,8 +157,9 @@ class CartProxy:
         return sum([item.total_price for item in self.cart.item_set.all()])
 
     def shipping_total(self):
-        ship_f = settings.CART_SHIPPING_FUNCTION
-        return ship_f(self.cart.item_set.all(), settings.CART_SHIPPING_WEIGHT_COST)
+        ship_f = import_module(settings.CART_SHIPPING_FUNCTION)
+        return ship_f(self.cart.item_set.all(),
+                import_module(settings.CART_SHIPPING_WEIGHT_COST_)
 
     def total_inclusive(self):
         return self.total() + self.shipping_total()
@@ -174,13 +176,16 @@ class CartProxy:
         """
         return len(list(self.cart.item_set.all()))
 
-    def render_html_menu(self, template="templates/cart_menu.html"):
+    def render_html(self, template="templates/cart_menu.html", context=None):
         """
         Returns a dict {'html': <html menu for cart>}
         """
         t = loader.get_template(template)
-        c = RequestContext(self.request)
-        html_rendered = t.render(c)
+        if not context:
+            c = RequestContext(self.request)
+            html_rendered = t.render(c)
+        else:
+            html_rendered = t.render(context)
         return {'html':  html_rendered}
 
     def item_to_json(self, item, html=False, template="templates/cart_menu.html"):
