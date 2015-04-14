@@ -2,7 +2,7 @@ import json, decimal
 
 from django.core.serializers import serialize
 from django.conf import settings
-from django.utils.importlib import import_string
+from django.utils.module_loading import import_string
 from django.template import RequestContext, Template, loader
 from django.contrib.contenttypes.models import ContentType
 
