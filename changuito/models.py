@@ -3,6 +3,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
+from django_fsm import FSMField, transition
+
 try:
     from django.conf import settings
     User = settings.AUTH_USER_MODEL
@@ -50,7 +52,7 @@ class ItemManager(models.Manager):
 
 class Item(models.Model):
     cart = models.ForeignKey(Cart, verbose_name=_('cart'))
-    quantity = models.DecimalField(max_digits=18, decimal_places=3, verbose_name=_('quantity'))
+    quantity = models.IntegerField(verbose_name=_('quantity'))
     unit_price = models.DecimalField(max_digits=18, decimal_places=2, verbose_name=_('unit price'))
     # product as generic relation
     content_type = models.ForeignKey(ContentType)
@@ -106,3 +108,25 @@ class Item(models.Model):
 
         self.content_type = new_content_type
         self.save()
+
+
+# class Order(models.Model):
+# 	cart = models.OneToOneField(Cart)
+# 	uuid = UUIDField()
+# 	date_created = models.DateTimeField(auto_add_now=True)
+# 	payment_proof = models.FileField(blank=True, null=True)
+# 	state = FSMField(default='open', protected=True)
+# 
+# 	def save(self, *args, **kwargs):
+# 		if not self.cart.checkout_out:
+# 			self.cart.checked_out = True
+# 		return super(self, Order).save(**args, **kwargs)
+# 
+# 	@transition(field=state, source=['open', 'paid'], target='paid',	
+# 	def upload_payment(self, data, *args, **kwargs):
+# 		file = open(data)
+# 		self.payment_proof.save('new', File(file))
+# 
+# 	def confirm(self, *args, **kwargs):
+
+
