@@ -3,7 +3,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
+from django_extensions.db.fields import ShortUUIDField
 from django_fsm import FSMField, transition
+
+from .fields import RestrictedFileField
 
 try:
     from django.conf import settings
@@ -18,7 +21,8 @@ except ImportError:
 
 
 class Cart(models.Model):
-    user = models.ForeignKey(User, null=True, blank=True)
+    user = models.ForeignKey(User, null=True, blank=True,
+			on_delete=models.SET_NULL)
     creation_date = models.DateTimeField(verbose_name=_('creation date'), default=timezone.now)
     checked_out = models.BooleanField(default=False, verbose_name=_('checked out'))
 
@@ -52,7 +56,7 @@ class ItemManager(models.Manager):
 
 class Item(models.Model):
     cart = models.ForeignKey(Cart, verbose_name=_('cart'))
-    quantity = models.IntegerField(verbose_name=_('quantity'))
+    quantity = models.DecimalField(verbose_name=_('quantity'))
     unit_price = models.DecimalField(max_digits=18, decimal_places=2, verbose_name=_('unit price'))
     # product as generic relation
     content_type = models.ForeignKey(ContentType)
@@ -110,23 +114,49 @@ class Item(models.Model):
         self.save()
 
 
-# class Order(models.Model):
-# 	cart = models.OneToOneField(Cart)
-# 	uuid = UUIDField()
-# 	date_created = models.DateTimeField(auto_add_now=True)
-# 	payment_proof = models.FileField(blank=True, null=True)
-# 	state = FSMField(default='open', protected=True)
-# 
-# 	def save(self, *args, **kwargs):
-# 		if not self.cart.checkout_out:
-# 			self.cart.checked_out = True
-# 		return super(self, Order).save(**args, **kwargs)
-# 
-# 	@transition(field=state, source=['open', 'paid'], target='paid',	
-# 	def upload_payment(self, data, *args, **kwargs):
-# 		file = open(data)
-# 		self.payment_proof.save('new', File(file))
-# 
-# 	def confirm(self, *args, **kwargs):
+class Order(models.Model):
+ 	cart = models.OneToOneField(Cart)
+	number = models.CharField(max_length=64)
+ 	date_created = models.DateField(auto_add_now=True)
+ 	payment_proof = models.ResrictedFileField(
+            blank=True, 
+            null=True,
+            upload_to='payment',
+            content_types = ['application/pdf', 'image/jpg',
+                             'image/gif', 'image/png'],
+            max_upload_size=5242880
+            )
+    shipping_address = models.TextField()
+    customer_name = models.CharField(max_length=64)
+    email = models.EmailField()
+ 	uuid = ShortUUIDField()
+ 	state = FSMField(default='open', protected=True)
+ 
+ 	def save(self, *args, **kwargs):
+ 		if not self.cart.checkout_out:
+ 			self.cart.checked_out = True
+		if not self.number:
+			self.number =  str(self.id) + str(self.uuid[:2])
+ 		return super(self, Order).save(**args, **kwargs)
 
+    def payment_uploaded(self):
+        return bool(self.payment_proof)
+
+ 	@transition(field=state, source=['open', 'paid'], target='cancelled')
+	def cancel(self, *args, **kwargs):
+		pass
+
+ 	@transition(field=state, source=['open', 'paid'], target='paid')
+ 	def upload_payment(self, data, *args, **kwargs):
+ 		file = open(data)
+ 		self.payment_proof.save('new', File(file))
+ 
+ 	@transition(field=state, source=['paid'], target='confirmed',
+            conditions=[payment_uploaded])
+ 	def confirm(self, *args, **kwargs):
+		pass
+
+    @transition(field=state, source=['open', 'paid'], target='invalid')
+    def invalidate(self, *args, **kwargs):
+        pass
 
