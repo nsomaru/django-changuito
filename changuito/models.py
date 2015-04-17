@@ -137,7 +137,7 @@ class Order(models.Model):
             self.cart.checked_out = True
         if not self.number:
             self.number =  str(self.id) + str(self.uuid[:2])
-        return super(self, Order).save(**args, **kwargs)
+        return super(self, Order).save(*args, **kwargs)
 
     def payment_uploaded(self):
         return bool(self.payment_proof)
