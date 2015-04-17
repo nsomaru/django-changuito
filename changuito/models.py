@@ -117,7 +117,7 @@ class Item(models.Model):
 class Order(models.Model):
     cart = models.OneToOneField(Cart)
     number = models.CharField(max_length=64)
-    date_created = models.DateField(auto_add_now=True)
+    date_created = models.DateField(auto_now_add=True)
     payment_proof = models.ResrictedFileField(
             blank=True, 
             null=True,
@@ -144,19 +144,20 @@ class Order(models.Model):
 
     @transition(field=state, source=['open', 'paid'], target='cancelled')
     def cancel(self, *args, **kwargs):
-        pass
+        return True
 
     @transition(field=state, source=['open', 'paid'], target='paid')
     def upload_payment(self, data, *args, **kwargs):
         file = open(data)
         self.payment_proof.save('new', File(file))
+        return True
 
     @transition(field=state, source=['paid'], target='confirmed',
             conditions=[payment_uploaded])
     def confirm(self, *args, **kwargs):
-        pass
+        return True
 
     @transition(field=state, source=['open', 'paid'], target='invalid')
     def invalidate(self, *args, **kwargs):
-        pass
+        return True
 
