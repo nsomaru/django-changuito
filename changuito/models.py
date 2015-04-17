@@ -118,7 +118,7 @@ class Order(models.Model):
     cart = models.OneToOneField(Cart)
     number = models.CharField(max_length=64)
     date_created = models.DateField(auto_now_add=True)
-    payment_proof = models.ResrictedFileField(
+    payment_proof = models.RestrictedFileField(
             blank=True, 
             null=True,
             upload_to='payment',
