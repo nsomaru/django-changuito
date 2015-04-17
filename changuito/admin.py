@@ -37,6 +37,6 @@ confirm.short_description = "Mark selected as confirmed"
 
 class OrderAdmin(reversion.VersionAdmin):
     fields = ('customer_name', 'email', 'shipping_address')
-    list_display = ('number', 'date_created', 'customer_name', 'email', 'uuid')
+    list_display = ('number', 'date_created', 'customer_name', 'email', 'slug')
 
 admin.site.register(Order, OrderAdmin)

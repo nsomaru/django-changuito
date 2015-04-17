@@ -123,14 +123,16 @@ class Order(models.Model):
             blank=True, 
             null=True,
             upload_to='payment',
-            content_types = ['application/pdf', 'image/jpg',
+            content_types=['application/pdf', 'image/jpg',
                              'image/gif', 'image/png'],
             max_upload_size=5242880
             )
     shipping_address = models.TextField()
     customer_name = models.CharField(max_length=64)
     email = models.EmailField()
-    uuid = ShortUUIDField()
+    # we use a UUID here so that order URLs cannot
+    # be guessed
+    slug = ShortUUIDField()
     state = FSMField(default='open', protected=True)
  
     def save(self, *args, **kwargs):
