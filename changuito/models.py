@@ -127,9 +127,10 @@ class Order(models.Model):
                              'image/gif', 'image/png'],
             max_upload_size=5242880
             )
-    shipping_address = models.TextField()
     customer_name = models.CharField(max_length=64)
+    phone_number = models.CharField(max_length=32)
     email = models.EmailField()
+    shipping_address = models.TextField()
     # we use a UUID here so that order URLs cannot
     # be guessed
     slug = ShortUUIDField()
