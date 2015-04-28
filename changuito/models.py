@@ -125,12 +125,13 @@ class Order(models.Model):
             upload_to='payment',
             content_types=['application/pdf', 'image/jpg',
                              'image/gif', 'image/png'],
-            max_upload_size=5242880
+            max_upload_size=5242880 # 5mb
             )
     customer_name = models.CharField(max_length=64)
     phone_number = models.CharField(max_length=32)
     email = models.EmailField()
     shipping_address = models.TextField()
+    message = models.TextField(blank=True)
     # we use a UUID here so that order URLs cannot
     # be guessed
     slug = ShortUUIDField()
