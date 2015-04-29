@@ -6,6 +6,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django_extensions.db.fields import ShortUUIDField
 from django_fsm import FSMField, transition
 
+import shortuuid
+
 from .fields import RestrictedFileField
 
 try:
@@ -138,11 +140,13 @@ class Order(models.Model):
     state = FSMField(default='open', protected=True)
  
     def save(self, *args, **kwargs):
-        if not self.cart.checkout_out:
+        if not self.slug:
+            self.slug = shortuuid.uuid()
+        if not self.cart.checked_out:
             self.cart.checked_out = True
         if not self.number:
-            self.number =  str(self.id) + str(self.uuid[:2])
-        return super(self, Order).save(*args, **kwargs)
+            self.number =  str(self.id) + str(self.slug[:2])
+        return super(Order, self).save(*args, **kwargs)
 
     def payment_uploaded(self):
         return bool(self.payment_proof)
