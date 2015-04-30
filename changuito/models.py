@@ -140,12 +140,13 @@ class Order(models.Model):
     state = FSMField(default='open', protected=True)
  
     def save(self, *args, **kwargs):
+        super(Order, self).save(*args, **kwargs)
         if not self.slug:
             self.slug = shortuuid.uuid()
         if not self.cart.checked_out:
             self.cart.checked_out = True
         if not self.number:
-            self.number =  str(self.id) + str(self.slug[:2])
+            self.number =  str(self.id) + str(self.slug[:3])
         return super(Order, self).save(*args, **kwargs)
 
     def payment_uploaded(self):
