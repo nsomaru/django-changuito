@@ -42,8 +42,10 @@ class UserDoesNotExist(Exception):
 
 
 class CartProxy:
-    def __init__(self, request):
-        user = request.user
+    def __init__(self, request, cart=None):
+        # we pass none for a request when we just want a proxy
+        if request is not None:
+            user = request.user
         try:
             #First search by user
             if not user.is_anonymous():
@@ -54,7 +56,10 @@ class CartProxy:
                 cart_id = request.session.get(CART_ID)
                 cart = models.Cart.objects.get(id=cart_id, checked_out=False)
         except:
-            cart = self.new(request, user=user)
+            if cart is None:
+                cart = self.new(request, user=user)
+            else:
+                cart = models.Cart.objects.get(id=cart.id)
 
         self.request = request
         self.cart = cart
