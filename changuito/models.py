@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
@@ -118,14 +120,19 @@ class Item(models.Model):
 
 
 class Order(models.Model):
+    def upload_path(instance, filename):
+        path = 'payment/'
+        new_filename = instance.number + filename
+        return os.path.join(path, new_filename)
+
     cart = models.OneToOneField(Cart)
     number = models.CharField(max_length=64)
     date_created = models.DateField(auto_now_add=True)
     payment_proof = RestrictedFileField(
             blank=True, 
             null=True,
-            upload_to='payment',
-            content_types=['application/pdf', 'image/jpg',
+            upload_to=upload_path,
+            content_types=['application/pdf', 'image/jpeg',
                              'image/gif', 'image/png'],
             max_upload_size=5242880 # 5mb
             )
@@ -149,6 +156,7 @@ class Order(models.Model):
             self.number =  str(self.id) + str(self.slug[:3])
         return super(Order, self).save(*args, **kwargs)
 
+
     def payment_uploaded(self):
         return bool(self.payment_proof)
 
@@ -157,9 +165,7 @@ class Order(models.Model):
         return True
 
     @transition(field=state, source=['open', 'paid'], target='paid')
-    def upload_payment(self, data, *args, **kwargs):
-        file = open(data)
-        self.payment_proof.save('new', File(file))
+    def upload_payment(self, *args, **kwargs):
         return True
 
     @transition(field=state, source=['paid'], target='confirmed',
