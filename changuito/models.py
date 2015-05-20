@@ -23,6 +23,10 @@ try:
 except ImportError:
     from datetime import datetime as timezone
 
+def upload_path(instance, filename):
+    path = 'payment/'
+    new_filename = instance.number + filename
+    return os.path.join(path, new_filename)
 
 class Cart(models.Model):
     user = models.ForeignKey(User, null=True, blank=True,
@@ -120,10 +124,6 @@ class Item(models.Model):
 
 
 class Order(models.Model):
-    def upload_path(instance, filename):
-        path = 'payment/'
-        new_filename = instance.number + filename
-        return os.path.join(path, new_filename)
 
     cart = models.OneToOneField(Cart)
     number = models.CharField(max_length=64)
