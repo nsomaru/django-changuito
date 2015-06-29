@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.core.urlresolvers import reverse_lazy
 
 from django_extensions.db.fields import ShortUUIDField
 from django_fsm import FSMField, transition
@@ -153,8 +154,12 @@ class Order(models.Model):
         if not self.cart.checked_out:
             self.cart.checked_out = True
         if not self.number:
-            self.number =  str(self.id) + str(self.slug[:3])
+            self.number =  str(str(self.id) + str(self.slug[:3])).upper()
         return super(Order, self).save(*args, **kwargs)
+
+    # TODO change this, tightly coupled with VISA
+    def get_absolute_url(self):
+        return reverse_lazy('shop:order', kwargs={'slug': self.slug})
 
 
     def payment_uploaded(self):
