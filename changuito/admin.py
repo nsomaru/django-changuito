@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
-import reversion
+from reversion.admin import VersionAdmin
 
 from .models import Order 
 
@@ -35,7 +35,7 @@ invalidate.short_description = "Mark selected as invalid"
 confirm.short_description = "Mark selected as confirmed"
 
 
-class OrderAdmin(reversion.VersionAdmin):
+class OrderAdmin(VersionAdmin):
     fields = ('customer_name', 'email', 'shipping_address')
     list_display = ('number', 'date_created', 'customer_name', 'email', 'slug')
 
